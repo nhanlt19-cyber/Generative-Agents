@@ -8,7 +8,7 @@ if [ "$EUID" -ne 0 ]; then
     echo "Nếu không phải root, dùng: ./start_servers.sh"
 fi
 
-cd ~/generative_agents 2>/dev/null || cd /root/generative_agents 2>/dev/null || cd "$(dirname "$0")/.."
+cd ~/Generative-Agents 2>/dev/null || cd /root/Generative-Agents 2>/dev/null || cd "$(dirname "$0")/.."
 
 # Kiểm tra virtualenv
 if [ ! -d "venv" ]; then

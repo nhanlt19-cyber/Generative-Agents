@@ -82,7 +82,7 @@ ollama pull nomic-embed-text
 
 ```powershell
 # Upload toàn bộ thư mục
-scp -r generative_agents root@10.0.12.81:/root/
+scp -r Generative-Agents root@10.0.12.81:/root/
 ```
 
 ### Option 2: Git Clone
@@ -90,14 +90,14 @@ scp -r generative_agents root@10.0.12.81:/root/
 ```bash
 # Trên VM (với root)
 cd /root
-git clone <your-repo-url> generative_agents
-cd generative_agents
+git clone <your-repo-url> Generative-Agents
+cd Generative-Agents
 ```
 
 ### Option 3: WinSCP/FileZilla
 
 1. Kết nối đến `10.0.12.81` với user `root`
-2. Upload thư mục `generative_agents` lên `/root/`
+2. Upload thư mục `Generative-Agents` lên `/root/`
 
 ---
 
@@ -106,7 +106,7 @@ cd generative_agents
 ### 3.1. Di Chuyển Đến Thư Mục Dự Án
 
 ```bash
-cd /root/generative_agents
+cd /root/Generative-Agents
 ```
 
 ### 3.2. Chạy Script Setup Tự Động
@@ -193,7 +193,7 @@ ufw enable
 ### 5.1. Kiểm Tra Ollama Connection
 
 ```bash
-cd /root/generative_agents
+cd /root/Generative-Agents
 source venv/bin/activate
 cd reverie/backend_server
 python test_ollama_connection.py
@@ -204,7 +204,7 @@ python test_ollama_connection.py
 ### 5.2. Kiểm Tra Django
 
 ```bash
-cd /root/generative_agents
+cd /root/Generative-Agents
 source venv/bin/activate
 cd environment/frontend_server
 python manage.py check
@@ -228,7 +228,7 @@ hostname -I
 ### 6.1. Sử Dụng Script (Khuyến Nghị)
 
 ```bash
-cd /root/generative_agents
+cd /root/Generative-Agents
 chmod +x start_servers_root.sh
 ./start_servers_root.sh
 ```
@@ -242,7 +242,7 @@ chmod +x start_servers_root.sh
 screen -S env_server
 
 # Trong screen session
-cd /root/generative_agents
+cd /root/Generative-Agents
 source venv/bin/activate
 cd environment/frontend_server
 python manage.py runserver 0.0.0.0:8000
@@ -260,7 +260,7 @@ ssh root@10.0.12.81
 screen -S sim_server
 
 # Trong screen session
-cd /root/generative_agents
+cd /root/Generative-Agents
 source venv/bin/activate
 cd reverie/backend_server
 python reverie.py
@@ -286,7 +286,7 @@ screen -X -S env_server quit
 
 **Terminal 1 - Environment Server:**
 ```bash
-cd /root/generative_agents
+cd /root/Generative-Agents
 source venv/bin/activate
 cd environment/frontend_server
 python manage.py runserver 0.0.0.0:8000
@@ -297,7 +297,7 @@ python manage.py runserver 0.0.0.0:8000
 # SSH vào VM lần nữa
 ssh root@10.0.12.81
 
-cd /root/generative_agents
+cd /root/Generative-Agents
 source venv/bin/activate
 cd reverie/backend_server
 python reverie.py
@@ -401,9 +401,9 @@ After=network.target
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/root/generative_agents/environment/frontend_server
-Environment="PATH=/root/generative_agents/venv/bin"
-ExecStart=/root/generative_agents/venv/bin/python manage.py runserver 0.0.0.0:8000
+WorkingDirectory=/root/Generative-Agents/environment/frontend_server
+Environment="PATH=/root/Generative-Agents/venv/bin"
+ExecStart=/root/Generative-Agents/venv/bin/python manage.py runserver 0.0.0.0:8000
 Restart=always
 RestartSec=10
 
@@ -438,14 +438,14 @@ nano /root/start_servers.sh
 ```bash
 #!/bin/bash
 
-cd /root/generative_agents
+cd /root/Generative-Agents
 source venv/bin/activate
 
 # Start environment server in screen
-screen -dmS env_server bash -c "cd /root/generative_agents/environment/frontend_server && source /root/generative_agents/venv/bin/activate && python manage.py runserver 0.0.0.0:8000"
+screen -dmS env_server bash -c "cd /root/Generative-Agents/environment/frontend_server && source /root/Generative-Agents/venv/bin/activate && python manage.py runserver 0.0.0.0:8000"
 
 # Start simulation server in screen
-screen -dmS sim_server bash -c "cd /root/generative_agents/reverie/backend_server && source /root/generative_agents/venv/bin/activate && python reverie.py"
+screen -dmS sim_server bash -c "cd /root/Generative-Agents/reverie/backend_server && source /root/Generative-Agents/venv/bin/activate && python reverie.py"
 
 echo "Servers started in screen sessions"
 echo "View with: screen -r env_server or screen -r sim_server"
@@ -540,10 +540,10 @@ kill -9 <PID>
 
 ```bash
 # Kiểm tra quyền
-ls -la /root/generative_agents
+ls -la /root/Generative-Agents
 
 # Cấp quyền nếu cần
-chmod -R 755 /root/generative_agents
+chmod -R 755 /root/Generative-Agents
 ```
 
 ---
@@ -603,7 +603,7 @@ ps aux | grep python
 
 - [ ] Python 3.9.x đã cài trên VM
 - [ ] Ollama đang chạy với model llama3.1
-- [ ] Code đã upload lên `/root/generative_agents`
+- [ ] Code đã upload lên `/root/Generative-Agents`
 - [ ] Virtualenv đã tạo và activate
 - [ ] Dependencies đã cài đặt
 - [ ] `utils.py` đã cấu hình (localhost:11434)
@@ -621,7 +621,7 @@ ps aux | grep python
 
 ### Setup
 ```bash
-cd /root/generative_agents
+cd /root/Generative-Agents
 python3.9 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
