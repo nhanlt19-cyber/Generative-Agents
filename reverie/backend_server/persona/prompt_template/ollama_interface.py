@@ -49,8 +49,24 @@ def ollama_chat_request(prompt: str, model: str = None, base_url: str = None) ->
         result = response.json()
         return result["message"]["content"]
 
+    except requests.exceptions.ConnectionError as e:
+        print(f"Ollama Connection ERROR: Cannot connect to {base_url}")
+        print(f"  Details: {str(e)}")
+        print(f"  Check: Is Ollama running? Try: curl {base_url}/api/tags")
+        return "Ollama ERROR"
+    except requests.exceptions.Timeout as e:
+        print(f"Ollama Timeout ERROR: Request took too long (>120s)")
+        print(f"  Details: {str(e)}")
+        return "Ollama ERROR"
+    except requests.exceptions.HTTPError as e:
+        print(f"Ollama HTTP ERROR: {e.response.status_code}")
+        print(f"  Response: {e.response.text[:200]}")
+        return "Ollama ERROR"
     except Exception as e:
-        print(f"Ollama ERROR: {str(e)}")
+        print(f"Ollama ERROR: {type(e).__name__}: {str(e)}")
+        import traceback
+
+        print(f"  Traceback: {traceback.format_exc()[:500]}")
         return "Ollama ERROR"
 
 
@@ -105,8 +121,24 @@ def ollama_generate_request(
         result = response.json()
         return result["response"]
 
+    except requests.exceptions.ConnectionError as e:
+        print(f"Ollama Connection ERROR: Cannot connect to {base_url}")
+        print(f"  Details: {str(e)}")
+        print(f"  Check: Is Ollama running? Try: curl {base_url}/api/tags")
+        return "Ollama ERROR"
+    except requests.exceptions.Timeout as e:
+        print(f"Ollama Timeout ERROR: Request took too long (>120s)")
+        print(f"  Details: {str(e)}")
+        return "Ollama ERROR"
+    except requests.exceptions.HTTPError as e:
+        print(f"Ollama HTTP ERROR: {e.response.status_code}")
+        print(f"  Response: {e.response.text[:200]}")
+        return "Ollama ERROR"
     except Exception as e:
-        print(f"Ollama ERROR: {str(e)}")
+        print(f"Ollama ERROR: {type(e).__name__}: {str(e)}")
+        import traceback
+
+        print(f"  Traceback: {traceback.format_exc()[:500]}")
         return "Ollama ERROR"
 
 
@@ -145,10 +177,15 @@ def ollama_get_embedding(
         result = response.json()
         return result["embedding"]
 
+    except requests.exceptions.ConnectionError as e:
+        print(f"Ollama Embedding Connection ERROR: Cannot connect to {base_url}")
+        print(f"  Details: {str(e)}")
+        return [0.0] * 768  # Default embedding dimension
+    except requests.exceptions.Timeout as e:
+        print(f"Ollama Embedding Timeout ERROR: Request took too long")
+        return [0.0] * 768
     except Exception as e:
-        print(f"Ollama Embedding ERROR: {str(e)}")
-        # Fallback: return a zero vector if embedding fails
-        # You might want to use a different fallback strategy
+        print(f"Ollama Embedding ERROR: {type(e).__name__}: {str(e)}")
         return [0.0] * 768  # Default embedding dimension
 
 
