@@ -25,7 +25,9 @@ SECRET_KEY = 'c7l%1%b=2sh$o9zqvd4i*h8*__^@-5sm-y)m(1ib2t92)43@62'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# Allow access from remote machines (for Ubuntu VM deployment)
+# In production, replace '*' with specific IPs/domains
+ALLOWED_HOSTS = ['*']  # Allows access from any IP (10.0.12.81, localhost, etc.)
 
 
 # Application definition
