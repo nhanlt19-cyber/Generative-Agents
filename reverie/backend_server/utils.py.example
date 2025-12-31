@@ -1,0 +1,33 @@
+# ============================================================================
+# LLM Provider Configuration
+# ============================================================================
+# Choose your LLM provider: "openai" or "ollama"
+llm_provider = "ollama"  # Change to "openai" to use OpenAI API
+
+# OpenAI Configuration (only used if llm_provider == "openai")
+openai_api_key = "<Your OpenAI API>"
+key_owner = "<Name>"
+
+# Ollama Configuration (only used if llm_provider == "ollama")
+# Note: When running on Ubuntu VM, use localhost since Ollama is on the same machine
+ollama_base_url = "http://localhost:11434"  # Ollama API URL (localhost on Ubuntu VM)
+ollama_model_name = "llama3.1"  # Model for text generation
+ollama_embedding_model_name = (
+    "nomic-embed-text"  # Model for embeddings (e.g., "nomic-embed-text", "llama3.1")
+)
+
+# ============================================================================
+# Environment Configuration
+# ============================================================================
+maze_assets_loc = "../../environment/frontend_server/static_dirs/assets"
+env_matrix = f"{maze_assets_loc}/the_ville/matrix"
+env_visuals = f"{maze_assets_loc}/the_ville/visuals"
+
+fs_storage = "../../environment/frontend_server/storage"
+fs_temp_storage = "../../environment/frontend_server/temp_storage"
+
+collision_block_id = "32125"
+
+# Verbose
+debug = True
+
