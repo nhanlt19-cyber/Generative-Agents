@@ -43,7 +43,7 @@ def ollama_chat_request(prompt: str, model: str = None, base_url: str = None) ->
             "stream": False,
         }
 
-        response = requests.post(url, json=payload, timeout=300)  # Tăng timeout lên 5 phút cho prompt dài
+        response = requests.post(url, json=payload, timeout=600)  # Tăng timeout lên 10 phút cho prompt rất dài
         response.raise_for_status()
 
         result = response.json()
@@ -116,7 +116,7 @@ def ollama_generate_request(
         if stop:
             payload["options"]["stop"] = stop
 
-        response = requests.post(url, json=payload, timeout=300)  # Tăng timeout lên 5 phút cho prompt dài
+        response = requests.post(url, json=payload, timeout=600)  # Tăng timeout lên 10 phút cho prompt rất dài
         response.raise_for_status()
 
         # Ollama /api/generate can return streaming format (multiple JSON lines)
@@ -222,7 +222,7 @@ def ollama_get_embedding(
         url = f"{base_url}/api/embeddings"
         payload = {"model": model, "prompt": text}
 
-        response = requests.post(url, json=payload, timeout=300)  # Tăng timeout lên 5 phút cho prompt dài
+        response = requests.post(url, json=payload, timeout=600)  # Tăng timeout lên 10 phút cho prompt rất dài
         response.raise_for_status()
 
         result = response.json()

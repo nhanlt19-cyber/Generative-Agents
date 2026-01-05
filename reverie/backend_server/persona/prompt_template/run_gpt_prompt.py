@@ -361,12 +361,15 @@ def run_gpt_prompt_task_decomp(persona,
     print (gpt_response)
     print ("-==- -==- -==- ")
 
+    # Extract duration from prompt if needed for fallback
+    fallback_duration = duration  # Use outer scope duration
+    
     # TODO SOMETHING HERE sometimes fails... See screenshot
     # Check if response is empty or error
     if not gpt_response or "Ollama ERROR" in gpt_response or "ERROR" in gpt_response:
       print("ERROR: Invalid or empty response from LLM")
       # Return a default safe response
-      return [["sleeping", duration]] if duration > 0 else [["resting", 5]]
+      return [["sleeping", fallback_duration]] if fallback_duration > 0 else [["resting", 5]]
     
     temp = [i.strip() for i in gpt_response.split("\n")]
     _cr = []
@@ -399,9 +402,9 @@ def run_gpt_prompt_task_decomp(persona,
         task = task[:-1]
       try:
         duration_str = k[1].split(",")[0].strip()
-        duration = int(duration_str)
-        if duration > 0:
-          cr += [[task, duration]]
+        task_duration = int(duration_str)  # Rename to avoid conflict with outer scope duration
+        if task_duration > 0:
+          cr += [[task, task_duration]]
         else:
           print(f"Warning: Invalid duration (0 or negative) in line: {i}")
       except (ValueError, IndexError) as e:
@@ -411,7 +414,7 @@ def run_gpt_prompt_task_decomp(persona,
     # If no valid tasks were parsed, return a safe default
     if not cr:
       print("ERROR: No valid tasks parsed from response. Using default.")
-      return [["sleeping", min(duration, 60)]] if duration > 0 else [["resting", 5]]
+      return [["sleeping", min(fallback_duration, 60)]] if fallback_duration > 0 else [["resting", 5]]
 
     total_expected_min = int(prompt.split("(total duration in minutes")[-1]
                                    .split("):")[0].strip())
