@@ -362,21 +362,56 @@ def run_gpt_prompt_task_decomp(persona,
     print ("-==- -==- -==- ")
 
     # TODO SOMETHING HERE sometimes fails... See screenshot
+    # Check if response is empty or error
+    if not gpt_response or "Ollama ERROR" in gpt_response or "ERROR" in gpt_response:
+      print("ERROR: Invalid or empty response from LLM")
+      # Return a default safe response
+      return [["sleeping", duration]] if duration > 0 else [["resting", 5]]
+    
     temp = [i.strip() for i in gpt_response.split("\n")]
     _cr = []
     cr = []
     for count, i in enumerate(temp): 
+      if not i:  # Skip empty lines
+        continue
       if count != 0: 
-        _cr += [" ".join([j.strip () for j in i.split(" ")][3:])]
+        parts = [j.strip() for j in i.split(" ")]
+        if len(parts) >= 4:
+          _cr += [" ".join(parts[3:])]
+        else:
+          _cr += [i]
       else: 
         _cr += [i]
+    
     for count, i in enumerate(_cr): 
+      if not i:  # Skip empty lines
+        continue
       k = [j.strip() for j in i.split("(duration in minutes:")]
-      task = k[0]
+      if len(k) < 2:
+        # Skip lines that don't have the expected format
+        print(f"Warning: Skipping line with invalid format: {i}")
+        continue
+      task = k[0].strip()
+      if not task:
+        print(f"Warning: Empty task in line: {i}")
+        continue
       if task[-1] == ".": 
         task = task[:-1]
-      duration = int(k[1].split(",")[0].strip())
-      cr += [[task, duration]]
+      try:
+        duration_str = k[1].split(",")[0].strip()
+        duration = int(duration_str)
+        if duration > 0:
+          cr += [[task, duration]]
+        else:
+          print(f"Warning: Invalid duration (0 or negative) in line: {i}")
+      except (ValueError, IndexError) as e:
+        print(f"Warning: Could not parse duration from line: {i}, Error: {e}")
+        continue
+    
+    # If no valid tasks were parsed, return a safe default
+    if not cr:
+      print("ERROR: No valid tasks parsed from response. Using default.")
+      return [["sleeping", min(duration, 60)]] if duration > 0 else [["resting", 5]]
 
     total_expected_min = int(prompt.split("(total duration in minutes")[-1]
                                    .split("):")[0].strip())
@@ -470,8 +505,14 @@ def run_gpt_prompt_task_decomp(persona,
     ftime_sum += fi_duration
   
   # print ("for debugging... line 365", fin_output)
-  fin_output[-1][1] += (duration - ftime_sum)
-  output = fin_output 
+  # Check if fin_output is not empty before accessing last element
+  if fin_output:
+    fin_output[-1][1] += (duration - ftime_sum)
+    output = fin_output
+  else:
+    # If no output, use a default safe response
+    print("WARNING: No valid output from task decomposition. Using default.")
+    output = [["sleeping", min(duration, 60)]] if duration > 0 else [["resting", 5]] 
 
 
 
