@@ -127,3 +127,4 @@ python test_ollama_connection.py
 
 Nếu tất cả đều ✓, bạn có thể chạy simulation!
 
+

@@ -119,3 +119,4 @@ print("  2. Model đã tải: ollama list")
 print("  3. Kết nối: curl http://localhost:11434/api/tags")
 print()
 
+

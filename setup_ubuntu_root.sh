@@ -132,3 +132,4 @@ echo ""
 echo "Xem TRIEN_KHAI_UBUNTU_ROOT.md để biết chi tiết"
 echo ""
 
+

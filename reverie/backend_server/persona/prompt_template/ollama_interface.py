@@ -105,6 +105,7 @@ def ollama_generate_request(
         payload = {
             "model": model,
             "prompt": prompt,
+            "stream": False,  # Disable streaming to get single JSON response
             "options": {
                 "temperature": temperature,
                 "top_p": top_p,
@@ -118,8 +119,58 @@ def ollama_generate_request(
         response = requests.post(url, json=payload, timeout=120)
         response.raise_for_status()
 
-        result = response.json()
-        return result["response"]
+        # Ollama /api/generate can return streaming format (multiple JSON lines)
+        # or single JSON object. Handle both cases.
+        text = response.text.strip()
+
+        # Try to parse as single JSON first
+        try:
+            result = json.loads(text)
+            if isinstance(result, dict) and "response" in result:
+                return result["response"]
+        except json.JSONDecodeError:
+            # If single JSON fails, might be streaming format (multiple JSON lines)
+            pass
+
+        # Try parsing as streaming format (one JSON per line)
+        full_response = ""
+        lines = text.split("\n")
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                result = json.loads(line)
+                if isinstance(result, dict):
+                    # Extract response from each chunk
+                    if "response" in result:
+                        full_response += result["response"]
+                    # Check if done
+                    if result.get("done", False):
+                        break
+            except json.JSONDecodeError:
+                # Skip invalid JSON lines
+                continue
+
+        if full_response:
+            return full_response
+
+        # If all parsing fails, try to extract from raw text
+        # Look for "response" field in text
+        try:
+            # Try to find last complete JSON object
+            last_brace = text.rfind("}")
+            if last_brace != -1:
+                last_json = text[: last_brace + 1]
+                result = json.loads(last_json)
+                if "response" in result:
+                    return result["response"]
+        except:
+            pass
+
+        # Last resort: return error
+        print(f"Warning: Could not parse Ollama response. Raw text: {text[:200]}")
+        return "Ollama ERROR: Could not parse response"
 
     except requests.exceptions.ConnectionError as e:
         print(f"Ollama Connection ERROR: Cannot connect to {base_url}")

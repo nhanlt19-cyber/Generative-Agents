@@ -207,3 +207,4 @@ run 10  # Test với số steps nhỏ trước
 - Chạy `debug_ollama.py` để test trước khi chạy simulation
 - Nếu vẫn lỗi, xem terminal output để thấy chi tiết exception
 
+

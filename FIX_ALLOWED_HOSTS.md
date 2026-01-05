@@ -78,3 +78,4 @@ Bạn sẽ thấy: "Your environment server is up and running" (không còn lỗ
 - Để bảo mật hơn, dùng: `ALLOWED_HOSTS = ['10.0.12.81', 'localhost', '127.0.0.1']`
 - File `local.py` override `base.py`, nên cần sửa cả 2 file hoặc chỉ sửa `local.py`
 
+

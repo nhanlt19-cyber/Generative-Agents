@@ -220,3 +220,4 @@ Nếu gặp vấn đề, vui lòng:
 2. Đảm bảo Ollama đang chạy và model đã được tải
 3. Kiểm tra cấu hình trong `utils.py`
 
+
