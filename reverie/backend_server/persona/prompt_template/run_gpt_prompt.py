@@ -1154,7 +1154,24 @@ def run_gpt_prompt_act_obj_event_triple(act_game_object, act_obj_desc, persona, 
   fail_safe = get_fail_safe(act_game_object)
   output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
-  output = (act_game_object, output[0], output[1])
+  
+  # Ensure output is a list/tuple with at least 2 elements
+  if isinstance(output, (list, tuple)):
+    if len(output) >= 2:
+      output = (act_game_object, output[0], output[1])
+    elif len(output) == 1:
+      # If only one element, use it for both verb and object
+      output = (act_game_object, output[0], output[0])
+    else:
+      # Empty list, use fail_safe
+      output = fail_safe
+  else:
+    # If output is not a list/tuple (e.g., string), use fail_safe
+    output = fail_safe
+  
+  # Final check: ensure output is a tuple with 3 elements
+  if not isinstance(output, tuple) or len(output) != 3:
+    output = fail_safe
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 

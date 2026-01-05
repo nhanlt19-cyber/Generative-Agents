@@ -275,7 +275,11 @@ def generate_act_obj_desc(act_game_object, act_desp, persona):
 
 def generate_act_obj_event_triple(act_game_object, act_obj_desc, persona): 
   if debug: print ("GNS FUNCTION: <generate_act_obj_event_triple>")
-  return run_gpt_prompt_act_obj_event_triple(act_game_object, act_obj_desc, persona)[0]
+  result = run_gpt_prompt_act_obj_event_triple(act_game_object, act_obj_desc, persona)
+  if result is None:
+    # Fallback if function returns None
+    return (act_game_object, "is", "idle")
+  return result[0] if isinstance(result, (list, tuple)) and len(result) > 0 else (act_game_object, "is", "idle")
 
 
 def generate_convo(maze, init_persona, target_persona): 
