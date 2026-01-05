@@ -8,6 +8,7 @@ Description: Wrapper functions for calling OpenAI APIs or Ollama APIs.
 
 import json
 import random
+import re
 import time
 
 from utils import *
@@ -174,23 +175,65 @@ def ChatGPT_safe_generate_response(
 
         try:
             curr_gpt_response = ChatGPT_request(prompt).strip()
-            end_index = curr_gpt_response.rfind("}") + 1
-            curr_gpt_response = curr_gpt_response[:end_index]
-            curr_gpt_response = json.loads(curr_gpt_response)["output"]
-
-            # print ("---ashdfaf")
-            # print (curr_gpt_response)
-            # print ("000asdfhia")
-
-            if func_validate(curr_gpt_response, prompt=prompt):
-                return func_clean_up(curr_gpt_response, prompt=prompt)
+            
+            # Check for error response
+            if not curr_gpt_response or "ERROR" in curr_gpt_response:
+                if verbose:
+                    print(f"---- repeat count: {i}, ERROR response: {curr_gpt_response}")
+                continue
+            
+            # Try to extract JSON from response
+            # Look for JSON object in the response
+            json_start = curr_gpt_response.find("{")
+            json_end = curr_gpt_response.rfind("}") + 1
+            
+            if json_start != -1 and json_end > json_start:
+                json_str = curr_gpt_response[json_start:json_end]
+                try:
+                    parsed = json.loads(json_str)
+                    if isinstance(parsed, dict) and "output" in parsed:
+                        curr_gpt_response = parsed["output"]
+                    elif isinstance(parsed, str):
+                        curr_gpt_response = parsed
+                    else:
+                        # Try to get first value if not "output" key
+                        curr_gpt_response = list(parsed.values())[0] if parsed else curr_gpt_response
+                except json.JSONDecodeError as e:
+                    if verbose:
+                        print(f"---- JSON decode error: {e}, trying to extract text directly")
+                    # Try to extract text between quotes or after colon
+                    if '"' in json_str:
+                        # Extract text between quotes
+                        import re
+                        matches = re.findall(r'"([^"]+)"', json_str)
+                        if matches:
+                            curr_gpt_response = matches[-1]  # Get last match (usually the output)
+                    elif ":" in json_str:
+                        # Extract text after colon
+                        parts = json_str.split(":", 1)
+                        if len(parts) > 1:
+                            curr_gpt_response = parts[1].strip().strip('"').strip("'")
+            else:
+                # No JSON found, try to use response as-is
+                if verbose:
+                    print(f"---- No JSON found, using response as-is: {curr_gpt_response[:100]}")
+            
+            # Validate and clean up
+            if func_validate and func_validate(curr_gpt_response, prompt=prompt):
+                if func_clean_up:
+                    return func_clean_up(curr_gpt_response, prompt=prompt)
+                return curr_gpt_response
 
             if verbose:
                 print("---- repeat count: \n", i, curr_gpt_response)
                 print(curr_gpt_response)
                 print("~~~~")
 
-        except:
+        except Exception as e:
+            if verbose:
+                print(f"---- Exception in ChatGPT_safe_generate_response: {e}")
+                import traceback
+                print(traceback.format_exc())
             pass
 
     return False

@@ -1091,6 +1091,8 @@ def run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona, verbose=Fals
                                           __chat_func_validate, __chat_func_clean_up, True)
   if output != False: 
     return output, [output, prompt, gpt_param, prompt_input, fail_safe]
+  # If output is False, return fail_safe to avoid None return
+  return fail_safe, [fail_safe, prompt, gpt_param, prompt_input, fail_safe]
   # ChatGPT Plugin ===========================================================
 
 
