@@ -727,21 +727,28 @@ def run_gpt_prompt_action_arena(action_description,
     return prompt_input
 
   def __func_clean_up(gpt_response, prompt=""):
-    cleaned_response = gpt_response.split("}")[0]
+    cleaned_response = gpt_response.split("}")[0].strip()
+    # Remove any curly braces
+    cleaned_response = cleaned_response.replace("{", "").replace("}", "").strip()
     return cleaned_response
 
   def __func_validate(gpt_response, prompt=""): 
     if len(gpt_response.strip()) < 1: 
       return False
-    if "}" not in gpt_response:
-      return False
+    # Basic validation - more detailed validation happens after response
     if "," in gpt_response: 
       return False
     return True
   
   def get_fail_safe(): 
-    fs = ("kitchen")
-    return fs
+    # Get accessible arenas from accessible_arena_str
+    # This will be set before calling get_fail_safe
+    if 'accessible_arena_str' in locals():
+      arenas = [a.strip() for a in accessible_arena_str.split(", ")]
+      if arenas:
+        return arenas[0]  # Return first available arena
+    # Fallback to "main room" if no arenas available
+    return "main room"
 
   gpt_param = {"engine": "text-davinci-003", "max_tokens": 15, 
                "temperature": 0, "top_p": 1, "stream": False,
@@ -750,14 +757,40 @@ def run_gpt_prompt_action_arena(action_description,
   prompt_input = create_prompt_input(action_description, persona, maze, act_world, act_sector)
   prompt = generate_prompt(prompt_input, prompt_template)
 
-  fail_safe = get_fail_safe()
+  # Get accessible arenas for validation and fail-safe
+  accessible_arena_str = prompt_input[2] if len(prompt_input) > 2 else ""
+  accessible_arenas = [a.strip() for a in accessible_arena_str.split(", ")] if accessible_arena_str else []
+  
+  # Set fail-safe based on accessible arenas
+  fail_safe = accessible_arenas[0] if accessible_arenas else "main room"
+  
   output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
   print (output)
-  # y = f"{act_world}:{act_sector}"
-  # x = [i.strip() for i in persona.s_mem.get_str_accessible_sector_arenas(y).split(",")]
-  # if output not in x: 
-  #   output = random.choice(x)
+  
+  # Validate output is in accessible arenas list
+  y = f"{act_world}:{act_sector}"
+  x = [i.strip() for i in persona.s_mem.get_str_accessible_sector_arenas(y).split(", ")] if persona.s_mem.get_str_accessible_sector_arenas(y) else []
+  if not x:
+    x = accessible_arenas  # Fallback to accessible_arenas from prompt_input
+  
+  # Check if output matches any accessible arena (case-insensitive)
+  output_clean = output.strip().lower()
+  output_valid = False
+  for arena in x:
+    if output_clean == arena.lower() or output_clean in arena.lower() or arena.lower() in output_clean:
+      output_valid = True
+      output = arena  # Use the correct case from the list
+      break
+  
+  # If output is not valid, use fail-safe or random choice
+  if not output_valid and x:
+    import random
+    output = random.choice(x)
+    print(f"Warning: LLM returned invalid arena '{output_clean}', using '{output}' instead")
+  elif not output_valid:
+    output = fail_safe
+    print(f"Warning: LLM returned invalid arena '{output_clean}', using fail-safe '{output}'")
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 

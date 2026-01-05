@@ -103,8 +103,16 @@ class MemoryTree:
 
     try: 
       x = ", ".join(list(self.tree[curr_world][curr_sector][curr_arena]))
-    except: 
-      x = ", ".join(list(self.tree[curr_world][curr_sector][curr_arena.lower()]))
+    except KeyError:
+      try:
+        x = ", ".join(list(self.tree[curr_world][curr_sector][curr_arena.lower()]))
+      except KeyError:
+        # Arena not found in tree, return empty string
+        print(f"Warning: Arena '{curr_arena}' not found in spatial memory tree for {curr_world}:{curr_sector}")
+        return ""
+    except Exception as e:
+      print(f"Warning: Error accessing arena '{curr_arena}' in spatial memory: {e}")
+      return ""
     return x
 
 
